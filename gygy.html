@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solitaire</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        .game-title {
+            text-align: center;
+            color: #fff;
+            font-size: 24px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-family: system-ui;
+        }
+
+        .card, .btn, .foundation, .stock, .pile {
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card::-moz-focus-inner,
+        .btn::-moz-focus-inner {
+            border: 0;
+        }
+
+        .card:focus,
+        .btn:focus,
+        .foundation:focus,
+        .stock:focus,
+        .pile:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        body { 
+            background: linear-gradient(45deg, #2c1810, #3a2218); 
+            min-height: 100vh; 
+            font-family: system-ui; 
+            perspective: 1000px;
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 15px; 
+            background: rgba(0, 0, 0, 0.2); 
+        }
+        .top { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: 15px auto; 
+            max-width: 900px; 
+            gap: 10px; 
+            padding: 0 15px;
+            flex-direction: row-reverse;
+        }
+        .foundation, .stock { 
+            width: 74px; 
+            height: 102px; 
+            border: 2px solid #8b4513; 
+            border-radius: 8px; 
+            background: rgba(139, 69, 19, 0.1); 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
+            backdrop-filter: blur(5px); 
+            cursor: pointer;
+            position: relative; 
+            overflow: hidden;
+        }
+
+        .stock:hover {
+            background: rgba(139, 69, 19, 0.15);
+        }
+
+        .foundation:active, .stock:active {
+            transform: scale(0.98);
+        }
+
+        .board { 
+            display: flex; 
+            justify-content: space-between; 
+            margin: auto; 
+            max-width: 900px; 
+            gap: 10px; 
+            padding: 0 15px;
+            flex-direction: row-reverse;
+        }
+        .pile { 
+            width: 74px; 
+            min-height: 102px; 
+            border: 2px solid #8b4513; 
+            border-radius: 8px; 
+            position: relative; 
+            background: rgba(139, 69, 19, 0.1); 
+            backdrop-filter: blur(5px);
+            overflow: visible;
+            transition: all 0.3s ease;
+        }
+
+        .pile:hover {
+            background: rgba(139, 69, 19, 0.15);
+        }
+
+        .card { 
+            width: 70px; 
+            height: 98px; 
+            background: #fff; 
+            border-radius: 6px; 
+            position: absolute; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 24px; 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); 
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+                        box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            backface-visibility: hidden;
+            transform-origin: center center;
+            will-change: transform;
+            z-index: 1; 
+            right: 2px;
+            top: 2px;
+            touch-action: manipulation;
+        }
+
+        .foundation .card {
+            transition: none;
+            transform: none !important;
+        }
+
+        .foundation .card:hover {
+            transform: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        .pile .card:not(.back):hover { 
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            z-index: 100; 
+        }
+
+        .selected { 
+            transform: translateY(-15px) scale(1.05) !important;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2) !important;
+            z-index: 99; 
+        }
+
+        .red { color: #e31b23; }
+        .black { color: #000; }
+
+        .back { 
+            background: linear-gradient(135deg, #404040, #303030); 
+            color: #fff;
+            cursor: default;
+            transition: none;
+        }
+
+        .back:hover {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn { 
+            color: #fff; 
+            font-size: 14px; 
+            background: rgba(0, 0, 0, 0.25); 
+            padding: 8px 20px; 
+            margin: 0 8px; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover { 
+            background: rgba(0, 0, 0, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .moves { 
+            color: #fff; 
+            font-size: 18px; 
+        }
+
+        .stacked:not(.back) { 
+            opacity: 0.98; 
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .stacked:not(.back):hover {
+            opacity: 1;
+            transform: translateY(-5px) scale(1.01);
+        }
+
+        .stacked.back { 
+            opacity: 1;
+            transition: none;
+        }
+
+        .stacked.back:hover {
+            transform: none;
+            opacity: 1;
+        }
+
+        .empty { 
+            background: rgba(139, 69, 19, 0.1); 
+            border: 2px dashed #8b4513; 
+        }
+        
+@media screen and (max-width: 1024px) {
+    .board, .top {
+        max-width: 700px;
+        gap: 8px;
+        padding: 0 10px;
+    }
+    
+    .foundation, .stock, .pile { 
+    width: 74px; 
+    height: 102px; /* تغيير من min-height إلى height */
+    border: 2px solid #8b4513; 
+    border-radius: 8px; 
+    background: rgba(139, 69, 19, 0.1); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); 
+    backdrop-filter: blur(5px); 
+    position: relative;
+}
+    }
+    
+    .card {
+        width: 70px;
+        height: 98px;
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .board, .top {
+        max-width: 100%;
+        gap: 6px;
+        padding: 0 6px;
+    }
+    
+    .foundation, .stock, .pile {
+        width: 60px;
+        min-height: 84px;
+    }
+    
+    .card {
+        width: 56px;
+        height: 80px;
+        font-size: 18px;
+        right: 2px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .board, .top {
+        gap: 4px;
+        padding: 0 4px;
+    }
+    
+    .foundation, .stock, .pile {
+        width: 46px;
+        min-height: 64px;
+    }
+    
+    .card {
+        width: 42px;
+        height: 60px;
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .foundation, .stock, .pile {
+        width: 40px;
+        min-height: 56px;
+    }
+    
+    .card {
+        width: 36px;
+        height: 52px;
+        font-size: 12px;
+    }
+}
+
+@media (hover: none) {
+    .pile .card:not(.back):hover,
+    .stock:hover,
+    .foundation:hover,
+    .pile:hover,
+    .btn:hover {
+        transform: none;
+        box-shadow: initial;
+        background: initial;
+    }
+    
+    .selected {
+        transform: translateY(-5px) scale(1.02) !important;
+    }
+}
+
+@media (pointer: coarse) {
+    .card, .btn {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .pile .card:not(.back):active {
+        transform: translateY(-5px) scale(1.01);
+    }
+}
+    </style>
+</head>
+
+<style>
+    .custom-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(45deg, #2c1810, #3a2218);
+        color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+        border: 2px solid #8b4513;
+        text-align: center;
+        z-index: 1000;
+        font-family: system-ui;
+    }
+
+    .custom-dialog-buttons {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .custom-dialog-button {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        background: rgba(139, 69, 19, 0.3);
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .custom-dialog-button:hover {
+        background: rgba(139, 69, 19, 0.5);
+        transform: translateY(-2px);
+    }
+
+    .custom-dialog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    .win-dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.9);
+        background: linear-gradient(45deg, #2c1810, #3a2218);
+        color: #fff;
+        padding: 30px 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        border: 3px solid #8b4513;
+        text-align: center;
+        z-index: 1000;
+        font-family: system-ui;
+        animation: winPopup 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        min-width: 300px;
+    }
+
+    .win-dialog h2 {
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #d4af37;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .win-dialog p {
+        font-size: 18px;
+        margin-bottom: 25px;
+        color: #fff;
+    }
+
+    .win-dialog-button {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        background: linear-gradient(45deg, #8b4513, #a0522d);
+        color: #fff;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .win-dialog-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        background: linear-gradient(45deg, #a0522d, #8b4513);
+    }
+
+    .win-dialog-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 999;
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    .win-confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #8b4513;
+        animation: confetti 1s ease-out forwards;
+    }
+
+    @keyframes winPopup {
+        0% {
+            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes confetti {
+        0% {
+            transform: translateY(0) rotateZ(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(100vh) rotateZ(720deg);
+            opacity: 0;
+        }
+    }
+
+    @keyframes cardPlace {
+        0% { transform: translateY(-20px) scale(1.1); opacity: 0; }
+        100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .card-placed {
+        animation: cardPlace 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .win-animation {
+        animation: win 1s ease-in-out;
+    }
+
+    @keyframes win {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div class="moves">الحركات: <span id="moves">0</span></div>
+        <div>
+            <button class="btn" onclick="newGame()">لعبة جديدة</button>
+            <button class="btn" onclick="undo()">تراجع</button>
+        </div>
+    </div>
+    <div class="game-title">Mota Simple Game 3</div>
+    <div class="top">
+        <div class="stock" id="deck"></div>
+        <div class="stock" id="waste"></div>
+        <div style="flex:1"></div>
+        <div class="foundation empty" id="f0"></div>
+        <div class="foundation empty" id="f1"></div>
+        <div class="foundation empty" id="f2"></div>
+        <div class="foundation empty" id="f3"></div>
+    </div>
+    <div class="board" id="tableau"></div>
+    <script>
+let deck = [], waste = [], foundation = [[], [], [], []], tableau = [[], [], [], [], [], [], []], moves = 0, selected = null, history = [];
+
+function showCustomDialog(message, onConfirm, onCancel) {
+    const overlay = document.createElement('div');
+    overlay.className = 'custom-dialog-overlay';
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'custom-dialog';
+    
+    const messageText = document.createElement('div');
+    messageText.textContent = message;
+    
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.className = 'custom-dialog-buttons';
+    
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'custom-dialog-button';
+    confirmButton.textContent = 'لعبة جديدة';
+    confirmButton.onclick = () => {
+        document.body.removeChild(overlay);
+        onConfirm();
+    };
+    
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'custom-dialog-button';
+    cancelButton.textContent = 'دعني أتحقق';
+    cancelButton.onclick = () => {
+        document.body.removeChild(overlay);
+        onCancel();
+    };
+    
+    buttonsDiv.appendChild(confirmButton);
+    buttonsDiv.appendChild(cancelButton);
+    dialog.appendChild(messageText);
+    dialog.appendChild(buttonsDiv);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+}
+
+function showWinDialog(moves) {
+    const overlay = document.createElement('div');
+    overlay.className = 'win-dialog-overlay';
+    
+    const dialog = document.createElement('div');
+    dialog.className = 'win-dialog';
+    
+    const title = document.createElement('h2');
+    title.textContent = '🎉 مبروك! 🎉';
+    
+    const message = document.createElement('p');
+    message.textContent = `لقد فزت في ${moves} حركة!`;
+    
+    const playAgainButton = document.createElement('button');
+    playAgainButton.className = 'win-dialog-button';
+    playAgainButton.textContent = 'العب مرة أخرى';
+    playAgainButton.onclick = () => {
+        document.body.removeChild(overlay);
+        newGame();
+    };
+    
+    const confettiColors = ['#8b4513', '#a0522d', '#d4af37', '#cd853f', '#deb887'];
+    
+    for(let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'win-confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.animationDuration = (Math.random() * 3 + 1) + 's';
+        confetti.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        overlay.appendChild(confetti);
+    }
+    
+    dialog.appendChild(title);
+    dialog.appendChild(message);
+    dialog.appendChild(playAgainButton);
+    overlay.appendChild(dialog);
+    document.body.appendChild(overlay);
+}
+
+function hasAvailableMoves() {
+    if (deck.length > 0) return true;
+    
+    if (waste.length > 0) {
+        const wasteCard = waste[waste.length - 1];
+        
+        for (let f = 0; f < 4; f++) {
+            if (foundation[f].length === 0 && wasteCard.value === 'A') return true;
+            if (foundation[f].length > 0) {
+                const topCard = foundation[f][foundation[f].length - 1];
+                if (wasteCard.suit === topCard.suit && 
+                    cardValue(wasteCard.value) === cardValue(topCard.value) + 1) return true;
+            }
+        }
+        
+        for (let t = 0; t < 7; t++) {
+            if (tableau[t].length === 0) {
+                if (wasteCard.value === 'K') return true;
+            } else {
+                const topCard = tableau[t][tableau[t].length - 1];
+                if (topCard.faceUp) {
+                    const targetIsRed = topCard.suit === '♥' || topCard.suit === '♦';
+                    const moveIsRed = wasteCard.suit === '♥' || wasteCard.suit === '♦';
+                    if (targetIsRed !== moveIsRed && 
+                        cardValue(topCard.value) === cardValue(wasteCard.value) + 1) return true;
+                }
+            }
+        }
+    }
+    
+    for (let fromCol = 0; fromCol < 7; fromCol++) {
+        if (tableau[fromCol].length === 0) continue;
+        
+        const colCards = tableau[fromCol].filter(card => card.faceUp);
+        if (colCards.length === 0) continue;
+        
+        for (let toCol = 0; toCol < 7; toCol++) {
+            if (fromCol === toCol) continue;
+            
+            const firstCard = colCards[0];
+            if (tableau[toCol].length === 0) {
+                if (firstCard.value === 'K') return true;
+            } else {
+                const targetCard = tableau[toCol][tableau[toCol].length - 1];
+                if (!targetCard.faceUp) continue;
+                
+                const targetIsRed = targetCard.suit === '♥' || targetCard.suit === '♦';
+                const moveIsRed = firstCard.suit === '♥' || firstCard.suit === '♦';
+                if (targetIsRed !== moveIsRed && 
+                    cardValue(targetCard.value) === cardValue(firstCard.value) + 1) return true;
+            }
+        }
+        
+        const topCard = tableau[fromCol][tableau[fromCol].length - 1];
+        if (topCard.faceUp) {
+            for (let f = 0; f < 4; f++) {
+                if (foundation[f].length === 0 && topCard.value === 'A') return true;
+                if (foundation[f].length > 0) {
+                    const foundationTop = foundation[f][foundation[f].length - 1];
+                    if (topCard.suit === foundationTop.suit && 
+                        cardValue(topCard.value) === cardValue(foundationTop.value) + 1) return true;
+                }
+            }
+        }
+    }
+    
+    return false;
+}
+
+function newGame() {
+    deck = [];
+    waste = [];
+    foundation = [[], [], [], []];
+    tableau = [[], [], [], [], [], [], []];
+    moves = 0;
+    selected = null;
+    history = [];
+
+    const suits = ['♠', '♥', '♣', '♦'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    
+    for (let suit of suits) {
+        for (let value of values) {
+            deck.push({ suit, value, faceUp: false });
+        }
+    }
+    
+    for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+
+    for (let i = 0; i < 7; i++) {
+        for (let j = i; j < 7; j++) {
+            const card = deck.pop();
+            card.faceUp = (j === i);
+            tableau[j].push(card);
+        }
+    }
+
+    saveState();
+    render();
+}
+
+function drawCard() {
+    if (deck.length === 0) {
+        deck = waste.reverse();
+        waste = [];
+        deck.forEach(card => card.faceUp = false);
+    } else {
+        const card = deck.pop();
+        if (card) {
+            card.faceUp = true;
+            card.isNewlyPlaced = true;
+            waste.push(card);
+            moves++;
+            saveState();
+            render();
+        }
+    }
+}
+
+function cardValue(value) {
+    return value === 'A' ? 1 : 
+           value === 'J' ? 11 : 
+           value === 'Q' ? 12 : 
+           value === 'K' ? 13 : 
+           parseInt(value);
+}
+
+
+function moveCards(from, to) {
+    let source, cards;
+
+    // منع تحريك البطاقات من tableau إلى waste
+    if (to.type === 'waste') {
+        return false;
+    }
+
+    if (from.type === 'tableau') {
+        source = tableau[from.col];
+        if (!source[from.index]?.faceUp) return false;
+        cards = source.slice(from.index);
+    } else if (from.type === 'waste') {
+        if (waste.length === 0) return false;
+        cards = [waste[waste.length - 1]];
+    } else return false;
+
+    const target = to.type === 'foundation' ? foundation[to.col] : tableau[to.col];
+    if (to.type === 'foundation' && cards.length > 1) return false;
+
+    // تحقق صارم للأعمدة الفارغة
+    if (to.type === 'tableau' && target.length === 0) {
+        if (cards[0].value !== 'K') {
+            return false;
+        }
+    }
+
+    const targetCard = target.length > 0 ? target[target.length - 1] : null;
+
+    if (!targetCard) {
+        if (to.type === 'foundation' && cards[0].value !== 'A') return false;
+        if (to.type === 'tableau' && cards[0].value !== 'K') return false;
+    } else {
+        if (to.type === 'foundation') {
+            if (cards[0].suit !== targetCard.suit) return false;
+            if (cardValue(cards[0].value) !== cardValue(targetCard.value) + 1) return false;
+        } else {
+            const targetIsRed = targetCard.suit === '♥' || targetCard.suit === '♦';
+            const moveIsRed = cards[0].suit === '♥' || cards[0].suit === '♦';
+            if (targetIsRed === moveIsRed || 
+                cardValue(targetCard.value) !== cardValue(cards[0].value) + 1) return false;
+        }
+    }
+
+    if (from.type === 'tableau') {
+        tableau[from.col].splice(from.index);
+        if (tableau[from.col].length > 0) {
+            tableau[from.col][tableau[from.col].length - 1].faceUp = true;
+        }
+    } else {
+        waste.pop();
+    }
+
+    cards.forEach(card => card.isNewlyPlaced = true);
+    target.push(...cards);
+    moves++;
+    saveState();
+    return true;
+}
+
+function handleClick(type, col, row = undefined) {
+    // إلغاء التحديد إذا تم الضغط على نفس المكان
+    if (selected && selected.type === type && selected.col === col) {
+        selected = null;
+        render();
+        return;
+    }
+
+    // منع أي تفاعل مع waste pile إذا كان هناك تحديد
+    if (selected && type === 'waste') {
+        selected = null;
+        render();
+        return;
+    }
+
+    // منع تحديد waste pile إذا كان هناك تحديد سابق
+    if (selected && type === 'waste') {
+        return;
+    }
+
+    if (!selected) {
+        if (type === 'waste' && waste.length > 0) {
+            selected = { type, col };
+            render();
+        } else if (type === 'tableau' && tableau[col].length > 0) {
+            if (row === undefined) {
+                row = tableau[col].length - 1;
+            }
+            if (!tableau[col][row].faceUp) {
+                return;
+            }
+            if (tableau[col][row]?.faceUp) {
+                selected = { type, col, index: row };
+                render();
+            }
+        }
+    } else {
+        // منع النقل إذا كان المصدر tableau والهدف waste
+        if (selected.type === 'tableau' && type === 'waste') {
+            selected = null;
+            render();
+            return;
+        }
+
+        if (type === 'tableau' && tableau[col].length === 0) {
+            let firstCard;
+            if (selected.type === 'tableau') {
+                firstCard = tableau[selected.col][selected.index];
+            } else if (selected.type === 'waste') {
+                firstCard = waste[waste.length - 1];
+            }
+            
+            if (firstCard && firstCard.value !== 'K') {
+                selected = null;
+                render();
+                return;
+            }
+        }
+
+        if (moveCards(selected, { type, col })) {
+            selected = null;
+            render();
+            checkWin();
+        } else {
+            selected = null;
+            render();
+        }
+    }
+}
+
+function checkWin() {
+    if (foundation.every(f => f.length === 13)) {
+        document.querySelectorAll('.foundation').forEach(f => 
+            f.classList.add('win-animation'));
+        setTimeout(() => {
+            showWinDialog(moves);
+        }, 500);
+        return true;
+    }
+    return false;
+}
+
+function saveState() {
+    const state = {
+        deck: deck.map(c => ({...c})),
+        waste: waste.map(c => ({...c})),
+        foundation: foundation.map(f => f.map(c => ({...c}))),
+        tableau: tableau.map(t => t.map(c => ({...c}))),
+        moves
+    };
+    history.push(JSON.stringify(state));
+}
+
+function undo() {
+    if (history.length > 1) {
+        history.pop();
+        const state = JSON.parse(history[history.length - 1]);
+        deck = state.deck;
+        waste = state.waste;
+        foundation = state.foundation;
+        tableau = state.tableau;
+        moves = state.moves;
+        selected = null;
+        render();
+    }
+}
+
+function render() {
+    document.getElementById('moves').textContent = moves;
+
+    document.getElementById('deck').innerHTML = 
+        deck.length ? '<div class="card back">🂠</div>' : '';
+    
+    document.getElementById('waste').innerHTML = waste.length ? 
+        `<div class="card ${(waste[waste.length - 1].suit === '♥' || waste[waste.length - 1].suit === '♦') ? 'red' : 'black'}
+        ${selected?.type === 'waste' ? ' selected' : ''}
+        ${waste[waste.length - 1].isNewlyPlaced ? ' card-placed' : ''}">${waste[waste.length - 1].value}${waste[waste.length - 1].suit}</div>` : '';
+
+    for (let i = 0; i < 4; i++) {
+        const f = foundation[i];
+        document.getElementById(`f${i}`).className = `foundation${f.length ? '' : ' empty'}`;
+        document.getElementById(`f${i}`).innerHTML = f.length ? 
+            `<div class="card ${(f[f.length - 1].suit === '♥' || f[f.length - 1].suit === '♦') ? 'red' : 'black'}
+            ${f[f.length - 1].isNewlyPlaced ? ' card-placed' : ''}">${f[f.length - 1].value}${f[f.length - 1].suit}</div>` : '';
+    }
+
+    document.getElementById('tableau').innerHTML = tableau.map((col, i) => 
+        `<div class="pile" style="height:${Math.max(102, (col.length - 1) * 20 + 102)}px">
+            ${col.map((card, j) => 
+                `<div class="card ${card.faceUp ? (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black') : 'back'}
+                ${selected?.type === 'tableau' && selected.col === i && j >= selected.index ? ' selected' : ''}
+                ${j < col.length - 1 ? ' stacked' : ''}
+                ${card.isNewlyPlaced ? ' card-placed' : ''}" style="top:${j * 20}px">
+                    ${card.faceUp ? card.value + card.suit : '🂠'}
+                </div>`
+            ).join('')}
+        </div>`
+    ).join('');
+
+    tableau.forEach(col => col.forEach(card => delete card.isNewlyPlaced));
+    foundation.forEach(f => f.forEach(card => delete card.isNewlyPlaced));
+    waste.forEach(card => delete card.isNewlyPlaced);
+
+    if (!hasAvailableMoves() && !checkWin()) {
+        setTimeout(() => {
+            showCustomDialog(
+                'لا توجد حركات متاحة!',
+                () => {
+                    newGame();
+                },
+                () => {}
+            );
+        }, 500);
+    }
+}
+
+document.getElementById('deck').onclick = drawCard;
+document.getElementById('waste').onclick = () => handleClick('waste', 0);
+
+for (let i = 0; i < 4; i++) {
+    document.getElementById(`f${i}`).onclick = () => handleClick('foundation', i);
+}
+
+document.getElementById('tableau').onclick = e => {
+    const card = e.target.closest('.card');
+    if (!card) {
+        const emptyColumn = e.target.closest('.pile');
+        if (emptyColumn) {
+            const col = Array.from(emptyColumn.parentNode.children).indexOf(emptyColumn);
+            handleClick('tableau', col);
+        }
+        return;
+    }
+    const col = Array.from(card.parentNode.parentNode.children).indexOf(card.parentNode);
+    const row = Math.floor(parseInt(card.style.top) / 20);
+    handleClick('tableau', col, row);
+};
+
+function handleClick(type, col, row = undefined) {
+    // إذا كنت تضغط على نفس المكان مرتين، قم بإلغاء التحديد
+    if (selected && selected.type === type && selected.col === col) {
+        selected = null;
+        render();
+        return;
+    }
+
+    // عند اختيار بطاقة للتحريك
+    if (!selected) {
+        if (type === 'waste' && waste.length > 0) {
+            selected = { type, col };
+            render();
+        } else if (type === 'tableau' && tableau[col].length > 0) {
+            if (row === undefined) {
+                row = tableau[col].length - 1;
+            }
+            if (!tableau[col][row].faceUp) {
+                return;
+            }
+            if (tableau[col][row]?.faceUp) {
+                selected = { type, col, index: row };
+                render();
+            }
+        }
+    } else {
+        // عند محاولة تحريك البطاقات إلى مكان جديد
+        if (type === 'tableau' && tableau[col].length === 0) {
+            // تحقق إذا كانت البطاقة الأولى في المجموعة المحددة هي King
+            let movingCards;
+            if (selected.type === 'tableau') {
+                movingCards = tableau[selected.col].slice(selected.index);
+            } else if (selected.type === 'waste') {
+                movingCards = [waste[waste.length - 1]];
+            }
+            
+            if (movingCards && movingCards[0].value !== 'K') {
+                selected = null;
+                render();
+                return;
+            }
+        }
+        
+        if (moveCards(selected, { type, col })) {
+            selected = null;
+            render();
+            checkWin();
+        } else {
+            selected = null;
+            render();
+        }
+    }
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        selected = null;
+        render();
+    } else if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
+        undo();
+    } else if (e.key === 'n' && (e.ctrlKey || e.metaKey)) {
+        newGame();
+    }
+});
+
+newGame();
+</script>
+</body>
+</html>  
