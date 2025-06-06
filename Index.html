@@ -489,6 +489,12 @@
         text-align: center;
         z-index: 1000;
         font-family: system-ui;
+        min-width: 300px; /* Base min-width */
+    }
+
+    .custom-dialog div:first-child {
+        font-size: 18px;
+        margin-bottom: 20px;
     }
 
     .custom-dialog-buttons {
@@ -506,6 +512,7 @@
         background: rgba(139, 69, 19, 0.3);
         color: #fff;
         transition: all 0.3s ease;
+        font-size: 14px;
     }
 
     .custom-dialog-button:hover {
@@ -667,6 +674,32 @@
         .win-dialog-button:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+
+        /* Styles for custom-dialog (No More Moves) at 1920px */
+        .custom-dialog {
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            border: 4px solid #8b4513;
+            min-width: 400px;
+        }
+
+        .custom-dialog div:first-child {
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+
+        .custom-dialog-button {
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 22px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .custom-dialog-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
     }
 </style>
