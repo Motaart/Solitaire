@@ -30,60 +30,60 @@
             }
         }
 
-        /* New media query for 1920px and larger screens */
+        /* New media query for 1920px and larger screens, significantly larger */
         @media screen and (min-width: 1920px) {
             .game-title {
-                font-size: 36px; /* Larger title */
-                margin: 25px 0;
+                font-size: 48px; /* Even larger title */
+                margin: 30px 0;
             }
             .header {
-                padding: 25px;
+                padding: 30px;
             }
             .moves {
-                font-size: 24px; /* Larger moves text */
+                font-size: 32px; /* Even larger moves text */
             }
             .btn {
-                font-size: 18px; /* Larger buttons */
-                padding: 12px 25px;
+                font-size: 22px; /* Even larger buttons */
+                padding: 15px 30px;
             }
             .top, .board {
-                max-width: 1200px; /* Wider layout */
-                gap: 15px;
-                padding: 0 25px;
+                max-width: 1400px; /* Wider layout */
+                gap: 20px;
+                padding: 0 30px;
             }
             .foundation, .stock, .pile {
-                width: 100px; /* Larger card slots */
-                height: 140px;
-                border-width: 3px;
-                border-radius: 12px;
+                width: 120px; /* Significantly larger card slots */
+                height: 168px;
+                border-width: 4px;
+                border-radius: 15px;
             }
             .pile {
-                min-height: 140px;
+                min-height: 168px;
             }
             .card {
-                width: 96px; /* Larger cards */
-                height: 134px;
-                border-radius: 10px;
-                font-size: 32px; /* Larger card text */
-                right: 2px;
-                top: 2px;
-            }
-            .pile .card {
-                top: 3px; /* Adjust for larger cards */
-            }
-            .stacked {
+                width: 114px; /* Significantly larger cards */
+                height: 160px;
+                border-radius: 12px;
+                font-size: 40px; /* Significantly larger card text */
+                right: 3px;
                 top: 3px;
             }
+            .pile .card {
+                top: 4px; /* Adjust for larger cards */
+            }
+            .stacked {
+                top: 4px;
+            }
             .stacked:not(.back) {
-                top: var(--stack-offset, 25px); /* Adjusted stack offset */
+                top: var(--stack-offset, 30px); /* Adjusted stack offset */
             }
             .card.selected {
-                transform: translateY(-20px) scale(1.06) !important;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+                transform: translateY(-25px) scale(1.07) !important;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
             }
             .pile .card:not(.back):hover {
-                transform: translateY(-15px) scale(1.03);
-                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+                transform: translateY(-20px) scale(1.04);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
             }
         }
 
@@ -1009,8 +1009,8 @@ function render() {
         document.querySelectorAll('.pile').forEach(pile => {
             const cards = pile.querySelectorAll('.card.stacked');
             cards.forEach((card, index) => {
-                card.style.setProperty('--stack-offset', `${index * 25}px`);
-                card.style.top = `${index * 25}px`;
+                card.style.setProperty('--stack-offset', `${index * 30}px`);
+                card.style.top = `${index * 30}px`;
             });
         });
     } else {
