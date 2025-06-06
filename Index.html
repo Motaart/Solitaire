@@ -636,6 +636,39 @@
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.1); }
     }
+
+    /* New styles for win dialog at 1920px */
+    @media screen and (min-width: 1920px) {
+        .win-dialog {
+            padding: 60px 80px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            border: 5px solid #8b4513;
+            min-width: 500px;
+        }
+
+        .win-dialog h2 {
+            font-size: 48px;
+            margin-bottom: 30px;
+        }
+
+        .win-dialog p {
+            font-size: 28px;
+            margin-bottom: 40px;
+        }
+
+        .win-dialog-button {
+            padding: 20px 50px;
+            border-radius: 35px;
+            font-size: 24px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .win-dialog-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+    }
 </style>
 </head>
 <body>
