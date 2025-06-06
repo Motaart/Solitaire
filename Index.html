@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solitaire</title>
     <style>
-        /*
-        * القواعد الحالية لرسالة الجوال
-        * تم الإبقاء عليها كما هي بناءً على طلبك للتركيز على 1920px فقط.
-        */
         @media screen and (max-width: 1023px) {
             body > *:not(.mobile-message) {
                 display: none;
@@ -40,6 +36,15 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             outline: none;
+        }
+
+        :root {
+            --card-width: 70px;
+            --card-height: 98px;
+            --pile-width: 74px;
+            --pile-min-height: 102px;
+            --card-stack-offset: 20px;
+            --card-font-size: 24px;
         }
 
         .game-title {
@@ -94,8 +99,8 @@
             flex-direction: row-reverse;
         }
         .foundation, .stock {
-            width: 74px;
-            height: 102px;
+            width: var(--pile-width);
+            height: var(--pile-min-height);
             border: 2px solid #8b4513;
             border-radius: 8px;
             background: rgba(139, 69, 19, 0.1);
@@ -124,8 +129,8 @@
             flex-direction: row-reverse;
         }
         .pile {
-            width: 74px;
-            min-height: 102px;
+            width: var(--pile-width);
+            min-height: var(--pile-min-height);
             border: 2px solid #8b4513;
             border-radius: 8px;
             position: relative;
@@ -140,8 +145,8 @@
         }
 
         .card {
-            width: 70px;
-            height: 98px;
+            width: var(--card-width);
+            height: var(--card-height);
             background: #fff;
             border-radius: 6px;
             position: absolute;
@@ -149,7 +154,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: var(--card-font-size);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
                         box-shadow 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -157,14 +162,24 @@
             transform-origin: center center;
             will-change: transform;
             z-index: 1;
-            right: 2px;
-            top: 2px;
+            right: calc((var(--pile-width) - var(--card-width)) / 2);
+            top: calc((var(--pile-min-height) - var(--card-height)) / 2);
             touch-action: manipulation;
         }
+        .pile .card {
+            right: 2px;
+            top: 2px;
+        }
+        .card.stacked {
+            top: var(--card-stack-offset);
+        }
+
 
         .foundation .card {
             transition: none;
             transform: none !important;
+            right: calc((var(--pile-width) - var(--card-width)) / 2);
+            top: calc((var(--pile-min-height) - var(--card-height)) / 2);
         }
 
         .foundation .card:hover {
@@ -251,6 +266,14 @@
         }
 
         @media screen and (max-width: 1024px) and (min-width: 769px) {
+            :root {
+                --card-width: 70px;
+                --card-height: 98px;
+                --pile-width: 74px;
+                --pile-min-height: 102px;
+                --card-stack-offset: 20px;
+                --card-font-size: 20px;
+            }
             .board, .top {
                 max-width: 700px;
                 gap: 8px;
@@ -258,8 +281,9 @@
             }
 
             .foundation, .stock, .pile {
-                width: 74px;
-                height: 102px;
+                width: var(--pile-width);
+                height: var(--pile-min-height);
+                min-height: var(--pile-min-height);
                 border: 2px solid #8b4513;
                 border-radius: 8px;
                 background: rgba(139, 69, 19, 0.1);
@@ -269,13 +293,21 @@
             }
 
             .card {
-                width: 70px;
-                height: 98px;
-                font-size: 20px;
+                width: var(--card-width);
+                height: var(--card-height);
+                font-size: var(--card-font-size);
             }
         }
 
         @media screen and (max-width: 768px) {
+            :root {
+                --card-width: 56px;
+                --card-height: 80px;
+                --pile-width: 60px;
+                --pile-min-height: 84px;
+                --card-stack-offset: 15px;
+                --card-font-size: 18px;
+            }
             .header {
                 flex-direction: column;
                 gap: 10px;
@@ -289,46 +321,62 @@
             }
 
             .foundation, .stock, .pile {
-                width: 60px;
-                min-height: 84px;
+                width: var(--pile-width);
+                min-height: var(--pile-min-height);
             }
 
             .card {
-                width: 56px;
-                height: 80px;
-                font-size: 18px;
+                width: var(--card-width);
+                height: var(--card-height);
+                font-size: var(--card-font-size);
                 right: 2px;
             }
         }
 
         @media screen and (max-width: 480px) {
+            :root {
+                --card-width: 42px;
+                --card-height: 60px;
+                --pile-width: 46px;
+                --pile-min-height: 64px;
+                --card-stack-offset: 12px;
+                --card-font-size: 14px;
+            }
             .board, .top {
                 gap: 4px;
                 padding: 0 4px;
             }
 
             .foundation, .stock, .pile {
-                width: 46px;
-                min-height: 64px;
+                width: var(--pile-width);
+                min-height: var(--pile-min-height);
             }
 
             .card {
-                width: 42px;
-                height: 60px;
-                font-size: 14px;
+                width: var(--card-width);
+                height: var(--card-height);
+                font-size: var(--card-font-size);
             }
         }
 
         @media screen and (max-width: 360px) {
+            :root {
+                --card-width: 36px;
+                --card-height: 52px;
+                --pile-width: 40px;
+                --pile-min-height: 56px;
+                --card-stack-offset: 10px;
+                --card-font-size: 12px;
+            }
             .foundation, .stock, .pile {
-                width: 40px;
-                min-height: 56px;
+                width: var(--pile-width);
+                min-height: var(--pile-min-height);
             }
 
             .card {
-                width: 36px;
-                height: 52px;
-                font-size: 12px;
+                width: var(--card-width);
+                height: var(--card-height);
+                font-size: var(--card-font-size);
             }
         }
 
@@ -359,70 +407,70 @@
             }
         }
 
-        /*
-        * ========= START OF 1920px MEDIA QUERY CODE =========
-        * هذا هو الكود المخصص لضبط التصميم عند عرض 1920px ليطابق الصورة.
-        */
         @media screen and (min-width: 1920px) {
+            :root {
+                --card-width: 136px;
+                --card-height: 192px;
+                --pile-width: 140px;
+                --pile-min-height: 196px;
+                --card-stack-offset: 45px;
+                --card-font-size: 48px;
+            }
+
             .header {
-                padding: 30px; /* زيادة حجم البادينج حول الهيدر */
+                padding: 30px;
             }
 
             .moves {
-                font-size: 28px; /* تكبير حجم خط عرض الحركات */
+                font-size: 28px;
             }
 
             .btn {
-                font-size: 18px; /* تكبير حجم خط الأزرار */
-                padding: 12px 30px; /* زيادة حجم الأزرار */
-                margin: 0 15px; /* زيادة المسافة بين الأزرار */
+                font-size: 18px;
+                padding: 12px 30px;
+                margin: 0 15px;
             }
 
             .game-title {
-                font-size: 40px; /* تكبير حجم عنوان اللعبة */
-                margin: 30px 0; /* زيادة المسافات العلوية والسفلية */
+                font-size: 40px;
+                margin: 30px 0;
             }
 
             .top, .board {
-                max-width: 1400px; /* زيادة أقصى عرض لمحتوى اللعبة */
-                gap: 30px; /* زيادة كبيرة للمسافات بين الأعمدة */
-                margin: 30px auto; /* زيادة المسافات العلوية والسفلية */
-                padding: 0 20px; /* زيادة البادينج الجانبي إذا لزم الأمر */
+                max-width: 1400px;
+                gap: 30px;
+                margin: 30px auto;
+                padding: 0 20px;
             }
 
             .foundation, .stock, .pile {
-                width: 140px; /* زيادة كبيرة لعرض مكان البطاقة */
-                height: 196px; /* زيادة كبيرة لارتفاع مكان البطاقة (نسبة 140:196 هي نفسها 70:98) */
-                min-height: 196px; /* لضمان أن الـ pile لا يقل عن هذا الارتفاع */
-                border-width: 3px; /* زيادة سماكة الحدود */
-                border-radius: 10px; /* يمكن تكبير انحناء الزوايا */
+                width: var(--pile-width);
+                height: var(--pile-min-height);
+                min-height: var(--pile-min-height);
+                border-width: 3px;
+                border-radius: 10px;
             }
 
             .card {
-                width: 136px; /* عرض البطاقة (أقل بـ 4px من عرض الـ pile) */
-                height: 192px; /* ارتفاع البطاقة (أقل بـ 4px من ارتفاع الـ pile) */
-                font-size: 48px; /* تكبير حجم الخط داخل البطاقة بشكل ملحوظ */
-                right: 2px; /* يظل 2px ليتوسط البطاقة ضمن 4px فرق */
-                top: 2px;   /* يظل 2px ليتوسط البطاقة ضمن 4px فرق */
-                border-radius: 9px; /* يمكن تكبير انحناء الزوايا قليلاً */
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* ظل أكبر قليلاً */
+                width: var(--card-width);
+                height: var(--card-height);
+                font-size: var(--card-font-size);
+                border-radius: 9px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
 
             .pile .card:not(.back):hover {
-                transform: translateY(-20px) scale(1.03); /* تأثير تحويم أكبر */
+                transform: translateY(-20px) scale(1.03);
                 box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
                 z-index: 100;
             }
 
             .selected {
-                transform: translateY(-25px) scale(1.07) !important; /* تأثير تحديد أكبر وأبرز */
+                transform: translateY(-25px) scale(1.07) !important;
                 box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35) !important;
                 z-index: 99;
             }
         }
-        /*
-        * ========= END OF 1920px MEDIA QUERY CODE =========
-        */
     </style>
 </head>
 
@@ -984,6 +1032,10 @@ function undo() {
     }
 }
 
+function getCssVariable(variableName) {
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(variableName));
+}
+
 function render() {
     document.getElementById('moves').textContent = moves;
 
@@ -1003,28 +1055,12 @@ function render() {
             ${f[f.length - 1].isNewlyPlaced ? ' card-placed' : ''}">${f[f.length - 1].value}${f[f.length - 1].suit}</div>` : '';
     }
 
-    // تحديد متغيرات الـ offset والارتفاع الأساسي للـ pile بناءً على عرض الشاشة
-    // يتم قراءتها من CSS Computed Style إذا كانت متاحة (خاصية مخصصة)، وإلا استخدام قيم افتراضية
-    let cardStackOffset = 20; // الافتراضي
-    let basePileHeight = 102; // الافتراضي
-
-    // محاولة قراءة القيم من CSS Custom Properties في الميديا كوير الجديد
-    const rootStyle = getComputedStyle(document.documentElement);
-    if (window.innerWidth >= 1920) {
-        // إذا كنا في ميديا كوير 1920px، نستخدم القيم المحددة فيه
-        cardStackOffset = 45; // القيمة التي تتناسب مع البطاقات الأكبر
-        basePileHeight = 196; // القيمة التي تتناسب مع البطاقات الأكبر
-    } else if (window.innerWidth >= 1024) {
-        // يمكن إضافة منطق هنا إذا كان هناك ميديا كوير آخر بين 1024 و 1920
-        // حالياً لا يوجد لديك سوى 900px max-width لقواعد .top و .board
-        // لذلك سنستخدم القيم الافتراضية أو نحدد قيم وسيطة هنا إذا لزم الأمر
-        cardStackOffset = 20;
-        basePileHeight = 102;
-    }
+    const cardStackOffset = getCssVariable('--card-stack-offset');
+    const pileMinHeight = getCssVariable('--pile-min-height');
 
 
     document.getElementById('tableau').innerHTML = tableau.map((col, i) =>
-        `<div class="pile" style="height:${Math.max(basePileHeight, (col.length - 1) * cardStackOffset + basePileHeight)}px">
+        `<div class="pile" style="height:${Math.max(pileMinHeight, (col.length - 1) * cardStackOffset + pileMinHeight)}px">
             ${col.map((card, j) =>
                 `<div class="card ${card.faceUp ? (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black') : 'back'}
                 ${selected?.type === 'tableau' && selected.col === i && j >= selected.index ? ' selected' : ''}
@@ -1071,7 +1107,8 @@ document.getElementById('tableau').onclick = e => {
         return;
     }
     const col = Array.from(card.parentNode.parentNode.children).indexOf(card.parentNode);
-    const row = Math.floor(parseInt(card.style.top) / cardStackOffset); // استخدام cardStackOffset هنا
+    const cardStackOffset = getCssVariable('--card-stack-offset');
+    const row = Math.floor(parseInt(card.style.top) / cardStackOffset);
     handleClick('tableau', col, row);
 };
 
