@@ -30,68 +30,23 @@
             }
         }
 
-        /* NEW MEDIA QUERY FOR 1920PX AND LARGER SCREENS - MUCH, MUCH LARGER AND PROPER STACKING */
+        /* MEDIA QUERY FOR 1920PX AND LARGER SCREENS - ONLY ADJUST STACKING */
         @media screen and (min-width: 1920px) {
-            .game-title {
-                font-size: 90px; /* Even bigger title */
-                margin: 60px 0;
-            }
-            .header {
-                padding: 60px;
-            }
-            .moves {
-                font-size: 60px; /* Even bigger moves text */
-            }
-            .btn {
-                font-size: 40px; /* Even bigger buttons */
-                padding: 30px 60px;
-                border-radius: 50px;
-            }
-            .top, .board {
-                max-width: 2000px; /* Maximize width to use full screen on large displays */
-                gap: 40px; /* Increased gap for better spacing */
-                padding: 0 60px;
-            }
-            .foundation, .stock, .pile {
-                width: 220px; /* Wider card slots */
-                height: 310px; /* Taller card slots */
-                border-width: 7px;
-                border-radius: 30px;
-            }
+            /* Keep existing sizes for cards, foundations, buttons as they are in default */
+            /* The default styles already apply to these screens if not overridden. */
+
+            /* Adjust pile min-height for better stacking visibility on large screens */
             .pile {
-                /* IMPORTANT: Increase min-height to accommodate more visible stacked cards */
-                min-height: 900px; /* Adjusted significantly for clearer stacking */
-                /* Remove fixed height to allow content to dictate height, but maintain a minimum */
+                min-height: 500px; /* Increased to accommodate more cards visible */
             }
-            .card {
-                width: 210px; /* Wider cards */
-                height: 294px; /* Taller cards */
-                border-radius: 25px;
-                font-size: 80px; /* Larger card text */
-                right: 5px;
-                top: 5px; /* Offset from border of pile */
-            }
-            .pile .card {
-                top: 8px; /* Initial offset for the first card in a pile */
-            }
-            .stacked {
-                top: 8px; /* Default for stacked cards if not using --stack-offset */
-            }
+
+            /* Adjust the stack offset for stacked cards */
             .stacked:not(.back) {
-                /* Key change: Increase the vertical offset between stacked cards significantly */
-                top: var(--stack-offset, 70px); /* VERY IMPORTANT: Much larger stack offset */
-            }
-            .card.selected {
-                transform: translateY(-50px) scale(1.12) !important;
-                box-shadow: 0 50px 100px rgba(0, 0, 0, 0.6) !important;
-            }
-            .pile .card:not(.back):hover {
-                transform: translateY(-40px) scale(1.08);
-                box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+                top: var(--stack-offset, 40px); /* Adjust this value to control spacing */
             }
         }
 
-        /* DEFAULT STYLES - Smaller screens */
+        /* DEFAULT STYLES - These will apply to 1920px and above unless overridden specifically */
         * {
             margin: 0;
             padding: 0;
@@ -146,7 +101,7 @@
             display: flex;
             justify-content: space-between;
             margin: 15px auto;
-            max-width: 900px;
+            max-width: 900px; /* Default max-width */
             gap: 10px;
             padding: 0 15px;
             flex-direction: row-reverse;
@@ -176,20 +131,20 @@
             display: flex;
             justify-content: space-between;
             margin: auto;
-            max-width: 900px;
+            max-width: 900px; /* Default max-width */
             gap: 10px;
             padding: 0 15px;
             flex-direction: row-reverse;
         }
         .pile {
             width: 74px;
-            min-height: 102px; /* Default min-height for smaller screens */
+            min-height: 102px; /* Default min-height for piles */
             border: 2px solid #8b4513;
             border-radius: 8px;
             position: relative;
             background: rgba(139, 69, 19, 0.1);
             backdrop-filter: blur(5px);
-            overflow: visible; /* Important for stacked cards */
+            overflow: visible;
             transition: all 0.3s ease;
         }
 
@@ -997,11 +952,12 @@ function render() {
     }
 
     // Determine the actual stack offset based on screen width
-    let currentStackOffset = window.innerWidth >= 1920 ? 70 : 20; // 70px for large screens, 20px otherwise
+    // This value will be 40px for 1920px+ screens, and 20px otherwise (default)
+    let currentStackOffset = window.innerWidth >= 1920 ? 40 : 20;
 
     document.getElementById('tableau').innerHTML = tableau.map((col, i) =>
-        // Adjust min-height of pile based on number of cards to prevent overlap
-        `<div class="pile" style="min-height:${Math.max(280, (col.length - 1) * currentStackOffset + 280)}px">
+        // Adjust min-height of pile based on number of cards and currentStackOffset
+        `<div class="pile" style="min-height:${Math.max(102, (col.length - 1) * currentStackOffset + 102)}px">
             ${col.map((card, j) =>
                 `<div class="card ${card.faceUp ? (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black') : 'back'}
                 ${selected?.type === 'tableau' && selected.col === i && j >= selected.index ? ' selected' : ''}
@@ -1014,12 +970,13 @@ function render() {
     ).join('');
 
     // Ensure --stack-offset is set correctly for CSS to pick up if used
+    // This block is now less critical as 'top' is set directly in inline style,
+    // but useful if CSS variables were used more extensively.
     if (window.innerWidth >= 1920) {
         document.querySelectorAll('.pile').forEach(pile => {
             const cards = pile.querySelectorAll('.card.stacked');
             cards.forEach((card, index) => {
-                // Ensure top is set here for initial rendering as well
-                card.style.top = `${index * currentStackOffset}px`;
+                card.style.top = `${index * currentStackOffset}px`; // Re-apply for safety
             });
         });
     }
@@ -1060,7 +1017,7 @@ document.getElementById('tableau').onclick = e => {
     }
     const col = Array.from(card.parentNode.parentNode.children).indexOf(card.parentNode);
     // Dynamic calculation for row based on the actual stacked card offset
-    let currentStackOffset = window.innerWidth >= 1920 ? 70 : 20;
+    let currentStackOffset = window.innerWidth >= 1920 ? 40 : 20;
     const row = Math.round(parseInt(card.style.top) / currentStackOffset);
     handleClick('tableau', col, row);
 };
