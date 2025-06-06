@@ -30,23 +30,63 @@
             }
         }
 
-        /* MEDIA QUERY FOR 1920PX AND LARGER SCREENS - ONLY ADJUST STACKING */
+        /* New media query for 1920px and larger screens, significantly larger */
         @media screen and (min-width: 1920px) {
-            /* Keep existing sizes for cards, foundations, buttons as they are in default */
-            /* The default styles already apply to these screens if not overridden. */
-
-            /* Adjust pile min-height for better stacking visibility on large screens */
-            .pile {
-                min-height: 500px; /* Increased to accommodate more cards visible */
+            .game-title {
+                font-size: 48px; /* Even larger title */
+                margin: 30px 0;
             }
-
-            /* Adjust the stack offset for stacked cards */
+            .header {
+                padding: 30px;
+            }
+            .moves {
+                font-size: 32px; /* Even larger moves text */
+            }
+            .btn {
+                font-size: 22px; /* Even larger buttons */
+                padding: 15px 30px;
+            }
+            .top, .board {
+                max-width: 1400px; /* Wider layout */
+                gap: 20px;
+                padding: 0 30px;
+            }
+            .foundation, .stock, .pile {
+                width: 120px; /* Significantly larger card slots */
+                height: 168px;
+                border-width: 4px;
+                border-radius: 15px;
+            }
+            .pile {
+                min-height: 168px;
+            }
+            .card {
+                width: 114px; /* Significantly larger cards */
+                height: 160px;
+                border-radius: 12px;
+                font-size: 40px; /* Significantly larger card text */
+                right: 3px;
+                top: 3px;
+            }
+            .pile .card {
+                top: 4px; /* Adjust for larger cards */
+            }
+            .stacked {
+                top: 4px;
+            }
             .stacked:not(.back) {
-                top: var(--stack-offset, 40px); /* Adjust this value to control spacing */
+                top: var(--stack-offset, 30px); /* Adjusted stack offset */
+            }
+            .card.selected {
+                transform: translateY(-25px) scale(1.07) !important;
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
+            }
+            .pile .card:not(.back):hover {
+                transform: translateY(-20px) scale(1.04);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
             }
         }
 
-        /* DEFAULT STYLES - These will apply to 1920px and above unless overridden specifically */
         * {
             margin: 0;
             padding: 0;
@@ -101,7 +141,7 @@
             display: flex;
             justify-content: space-between;
             margin: 15px auto;
-            max-width: 900px; /* Default max-width */
+            max-width: 900px;
             gap: 10px;
             padding: 0 15px;
             flex-direction: row-reverse;
@@ -131,14 +171,14 @@
             display: flex;
             justify-content: space-between;
             margin: auto;
-            max-width: 900px; /* Default max-width */
+            max-width: 900px;
             gap: 10px;
             padding: 0 15px;
             flex-direction: row-reverse;
         }
         .pile {
             width: 74px;
-            min-height: 102px; /* Default min-height for piles */
+            min-height: 102px;
             border: 2px solid #8b4513;
             border-radius: 8px;
             position: relative;
@@ -951,32 +991,33 @@ function render() {
             ${f[f.length - 1].isNewlyPlaced ? ' card-placed' : ''}">${f[f.length - 1].value}${f[f.length - 1].suit}</div>` : '';
     }
 
-    // Determine the actual stack offset based on screen width
-    // This value will be 40px for 1920px+ screens, and 20px otherwise (default)
-    let currentStackOffset = window.innerWidth >= 1920 ? 40 : 20;
-
     document.getElementById('tableau').innerHTML = tableau.map((col, i) =>
-        // Adjust min-height of pile based on number of cards and currentStackOffset
-        `<div class="pile" style="min-height:${Math.max(102, (col.length - 1) * currentStackOffset + 102)}px">
+        `<div class="pile" style="height:${Math.max(102, (col.length - 1) * 20 + 102)}px">
             ${col.map((card, j) =>
                 `<div class="card ${card.faceUp ? (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black') : 'back'}
                 ${selected?.type === 'tableau' && selected.col === i && j >= selected.index ? ' selected' : ''}
                 ${j < col.length - 1 ? ' stacked' : ''}
-                ${card.isNewlyPlaced ? ' card-placed' : ''}" style="top:${j * currentStackOffset}px">
+                ${card.isNewlyPlaced ? ' card-placed' : ''}" style="top:${j * 20}px">
                     ${card.faceUp ? card.value + card.suit : '🂠'}
                 </div>`
             ).join('')}
         </div>`
     ).join('');
 
-    // Ensure --stack-offset is set correctly for CSS to pick up if used
-    // This block is now less critical as 'top' is set directly in inline style,
-    // but useful if CSS variables were used more extensively.
+    // Adjust stack offset for 1920px screens
     if (window.innerWidth >= 1920) {
         document.querySelectorAll('.pile').forEach(pile => {
             const cards = pile.querySelectorAll('.card.stacked');
             cards.forEach((card, index) => {
-                card.style.top = `${index * currentStackOffset}px`; // Re-apply for safety
+                card.style.setProperty('--stack-offset', `${index * 30}px`);
+                card.style.top = `${index * 30}px`;
+            });
+        });
+    } else {
+         document.querySelectorAll('.pile').forEach(pile => {
+            const cards = pile.querySelectorAll('.card.stacked');
+            cards.forEach((card, index) => {
+                card.style.top = `${index * 20}px`; /* Default offset */
             });
         });
     }
@@ -1016,9 +1057,7 @@ document.getElementById('tableau').onclick = e => {
         return;
     }
     const col = Array.from(card.parentNode.parentNode.children).indexOf(card.parentNode);
-    // Dynamic calculation for row based on the actual stacked card offset
-    let currentStackOffset = window.innerWidth >= 1920 ? 40 : 20;
-    const row = Math.round(parseInt(card.style.top) / currentStackOffset);
+    const row = Math.floor(parseInt(card.style.top) / 20); // Keep 20px as base for calculation
     handleClick('tableau', col, row);
 };
 
