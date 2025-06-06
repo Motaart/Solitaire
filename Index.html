@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solitaire</title>
     <style>
+        /*
+        * القواعد الحالية لرسالة الجوال
+        * تم الإبقاء عليها كما هي بناءً على طلبك للتركيز على 1920px فقط.
+        */
         @media screen and (max-width: 1023px) {
             body > *:not(.mobile-message) {
                 display: none;
@@ -354,6 +358,71 @@
                 transform: translateY(-5px) scale(1.01);
             }
         }
+
+        /*
+        * ========= START OF 1920px MEDIA QUERY CODE =========
+        * هذا هو الكود المخصص لضبط التصميم عند عرض 1920px ليطابق الصورة.
+        */
+        @media screen and (min-width: 1920px) {
+            .header {
+                padding: 30px; /* زيادة حجم البادينج حول الهيدر */
+            }
+
+            .moves {
+                font-size: 28px; /* تكبير حجم خط عرض الحركات */
+            }
+
+            .btn {
+                font-size: 18px; /* تكبير حجم خط الأزرار */
+                padding: 12px 30px; /* زيادة حجم الأزرار */
+                margin: 0 15px; /* زيادة المسافة بين الأزرار */
+            }
+
+            .game-title {
+                font-size: 40px; /* تكبير حجم عنوان اللعبة */
+                margin: 30px 0; /* زيادة المسافات العلوية والسفلية */
+            }
+
+            .top, .board {
+                max-width: 1400px; /* زيادة أقصى عرض لمحتوى اللعبة */
+                gap: 30px; /* زيادة كبيرة للمسافات بين الأعمدة */
+                margin: 30px auto; /* زيادة المسافات العلوية والسفلية */
+                padding: 0 20px; /* زيادة البادينج الجانبي إذا لزم الأمر */
+            }
+
+            .foundation, .stock, .pile {
+                width: 140px; /* زيادة كبيرة لعرض مكان البطاقة */
+                height: 196px; /* زيادة كبيرة لارتفاع مكان البطاقة (نسبة 140:196 هي نفسها 70:98) */
+                min-height: 196px; /* لضمان أن الـ pile لا يقل عن هذا الارتفاع */
+                border-width: 3px; /* زيادة سماكة الحدود */
+                border-radius: 10px; /* يمكن تكبير انحناء الزوايا */
+            }
+
+            .card {
+                width: 136px; /* عرض البطاقة (أقل بـ 4px من عرض الـ pile) */
+                height: 192px; /* ارتفاع البطاقة (أقل بـ 4px من ارتفاع الـ pile) */
+                font-size: 48px; /* تكبير حجم الخط داخل البطاقة بشكل ملحوظ */
+                right: 2px; /* يظل 2px ليتوسط البطاقة ضمن 4px فرق */
+                top: 2px;   /* يظل 2px ليتوسط البطاقة ضمن 4px فرق */
+                border-radius: 9px; /* يمكن تكبير انحناء الزوايا قليلاً */
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* ظل أكبر قليلاً */
+            }
+
+            .pile .card:not(.back):hover {
+                transform: translateY(-20px) scale(1.03); /* تأثير تحويم أكبر */
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+                z-index: 100;
+            }
+
+            .selected {
+                transform: translateY(-25px) scale(1.07) !important; /* تأثير تحديد أكبر وأبرز */
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35) !important;
+                z-index: 99;
+            }
+        }
+        /*
+        * ========= END OF 1920px MEDIA QUERY CODE =========
+        */
     </style>
 </head>
 
@@ -934,13 +1003,33 @@ function render() {
             ${f[f.length - 1].isNewlyPlaced ? ' card-placed' : ''}">${f[f.length - 1].value}${f[f.length - 1].suit}</div>` : '';
     }
 
+    // تحديد متغيرات الـ offset والارتفاع الأساسي للـ pile بناءً على عرض الشاشة
+    // يتم قراءتها من CSS Computed Style إذا كانت متاحة (خاصية مخصصة)، وإلا استخدام قيم افتراضية
+    let cardStackOffset = 20; // الافتراضي
+    let basePileHeight = 102; // الافتراضي
+
+    // محاولة قراءة القيم من CSS Custom Properties في الميديا كوير الجديد
+    const rootStyle = getComputedStyle(document.documentElement);
+    if (window.innerWidth >= 1920) {
+        // إذا كنا في ميديا كوير 1920px، نستخدم القيم المحددة فيه
+        cardStackOffset = 45; // القيمة التي تتناسب مع البطاقات الأكبر
+        basePileHeight = 196; // القيمة التي تتناسب مع البطاقات الأكبر
+    } else if (window.innerWidth >= 1024) {
+        // يمكن إضافة منطق هنا إذا كان هناك ميديا كوير آخر بين 1024 و 1920
+        // حالياً لا يوجد لديك سوى 900px max-width لقواعد .top و .board
+        // لذلك سنستخدم القيم الافتراضية أو نحدد قيم وسيطة هنا إذا لزم الأمر
+        cardStackOffset = 20;
+        basePileHeight = 102;
+    }
+
+
     document.getElementById('tableau').innerHTML = tableau.map((col, i) =>
-        `<div class="pile" style="height:${Math.max(102, (col.length - 1) * 20 + 102)}px">
+        `<div class="pile" style="height:${Math.max(basePileHeight, (col.length - 1) * cardStackOffset + basePileHeight)}px">
             ${col.map((card, j) =>
                 `<div class="card ${card.faceUp ? (card.suit === '♥' || card.suit === '♦' ? 'red' : 'black') : 'back'}
                 ${selected?.type === 'tableau' && selected.col === i && j >= selected.index ? ' selected' : ''}
                 ${j < col.length - 1 ? ' stacked' : ''}
-                ${card.isNewlyPlaced ? ' card-placed' : ''}" style="top:${j * 20}px">
+                ${card.isNewlyPlaced ? ' card-placed' : ''}" style="top:${j * cardStackOffset}px">
                     ${card.faceUp ? card.value + card.suit : '🂠'}
                 </div>`
             ).join('')}
@@ -982,7 +1071,7 @@ document.getElementById('tableau').onclick = e => {
         return;
     }
     const col = Array.from(card.parentNode.parentNode.children).indexOf(card.parentNode);
-    const row = Math.floor(parseInt(card.style.top) / 20);
+    const row = Math.floor(parseInt(card.style.top) / cardStackOffset); // استخدام cardStackOffset هنا
     handleClick('tableau', col, row);
 };
 
