@@ -30,6 +30,63 @@
             }
         }
 
+        /* New media query for 1920px and larger screens */
+        @media screen and (min-width: 1920px) {
+            .game-title {
+                font-size: 36px; /* Larger title */
+                margin: 25px 0;
+            }
+            .header {
+                padding: 25px;
+            }
+            .moves {
+                font-size: 24px; /* Larger moves text */
+            }
+            .btn {
+                font-size: 18px; /* Larger buttons */
+                padding: 12px 25px;
+            }
+            .top, .board {
+                max-width: 1200px; /* Wider layout */
+                gap: 15px;
+                padding: 0 25px;
+            }
+            .foundation, .stock, .pile {
+                width: 100px; /* Larger card slots */
+                height: 140px;
+                border-width: 3px;
+                border-radius: 12px;
+            }
+            .pile {
+                min-height: 140px;
+            }
+            .card {
+                width: 96px; /* Larger cards */
+                height: 134px;
+                border-radius: 10px;
+                font-size: 32px; /* Larger card text */
+                right: 2px;
+                top: 2px;
+            }
+            .pile .card {
+                top: 3px; /* Adjust for larger cards */
+            }
+            .stacked {
+                top: 3px;
+            }
+            .stacked:not(.back) {
+                top: var(--stack-offset, 25px); /* Adjusted stack offset */
+            }
+            .card.selected {
+                transform: translateY(-20px) scale(1.06) !important;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+            }
+            .pile .card:not(.back):hover {
+                transform: translateY(-15px) scale(1.03);
+                box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -947,6 +1004,24 @@ function render() {
         </div>`
     ).join('');
 
+    // Adjust stack offset for 1920px screens
+    if (window.innerWidth >= 1920) {
+        document.querySelectorAll('.pile').forEach(pile => {
+            const cards = pile.querySelectorAll('.card.stacked');
+            cards.forEach((card, index) => {
+                card.style.setProperty('--stack-offset', `${index * 25}px`);
+                card.style.top = `${index * 25}px`;
+            });
+        });
+    } else {
+         document.querySelectorAll('.pile').forEach(pile => {
+            const cards = pile.querySelectorAll('.card.stacked');
+            cards.forEach((card, index) => {
+                card.style.top = `${index * 20}px`; /* Default offset */
+            });
+        });
+    }
+
     tableau.forEach(col => col.forEach(card => delete card.isNewlyPlaced));
     foundation.forEach(f => f.forEach(card => delete card.isNewlyPlaced));
     waste.forEach(card => delete card.isNewlyPlaced);
@@ -982,7 +1057,7 @@ document.getElementById('tableau').onclick = e => {
         return;
     }
     const col = Array.from(card.parentNode.parentNode.children).indexOf(card.parentNode);
-    const row = Math.floor(parseInt(card.style.top) / 20);
+    const row = Math.floor(parseInt(card.style.top) / 20); // Keep 20px as base for calculation
     handleClick('tableau', col, row);
 };
 
